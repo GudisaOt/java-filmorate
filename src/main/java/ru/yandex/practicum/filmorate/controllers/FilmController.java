@@ -6,10 +6,7 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @Slf4j
@@ -20,23 +17,18 @@ public class FilmController {
 
 
     @GetMapping("/films")
-    public List<Film> findFilms(){
-        List<Film> filmList = new ArrayList<>(films.values());
-        return filmList;
+    public Collection<Film> findFilms(){
+        return films.values();
     }
 
     @PostMapping(value = "/films")
     public Film createFilm (@RequestBody Film film) throws ValidationException {
-        if (validation(film)){
+            validation(film);
             film.setId(iD);
             films.put(iD, film);
             iD++;
             log.info("Запрос : POST, Фильм добавлен, Фильмов : '{}'", films.size());
             return film;
-        } else {
-            log.info("Неверно заполнены поля, валидация не пройдена");
-            throw new ValidationException("Bad request!!!");
-        }
     }
 
     @PutMapping(value = "/films")
@@ -51,12 +43,14 @@ public class FilmController {
         return film;
     }
 
-    private static boolean validation (Film film) {
+    private static void validation (Film film) throws ValidationException {
         LocalDate filmsBirthday = LocalDate.parse("1895-12-28");
 
         boolean valid = !film.getName().isBlank() && film.getDescription().length() <= 200 &&
                 film.getDuration() > 0 && film.getReleaseDate().isAfter(filmsBirthday);
 
-        return valid;
+        if (!valid) {
+            throw new ValidationException("Bad request!!!");
+        }
     }
 }
