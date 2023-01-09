@@ -15,8 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 class FilmorateApplicationTests {
 
-	private UserController userController = new UserController();
-	private FilmController filmController = new FilmController();
+	private UserController userController;
+	private FilmController filmController;
 
 	@Test
 	public void emptyFilmNameTestAndLongDescription () {
