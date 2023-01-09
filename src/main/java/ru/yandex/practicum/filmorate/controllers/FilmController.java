@@ -37,7 +37,7 @@ public class FilmController {
     }
 
     @PutMapping(value = "/films")
-    public Film updateFilm(@RequestBody Film film) throws ValidationException {
+    public Film updateFilm(@RequestBody Film film){
         return inMemoryFilmStorage.updateFilm(film);
     }
 
