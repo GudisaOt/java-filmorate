@@ -9,6 +9,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 
@@ -21,12 +23,17 @@ public class User {
     @JsonFormat(pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private final LocalDate birthday;
-
+    private Set<Integer> friends;
     @Builder
     public User(String email, String login, LocalDate birthday, String name) {
         this.email = email;
         this.login = login;
         this.birthday = birthday;
         this.name = name;
+        friends = new HashSet<>();
+    }
+
+    public void addFriend(int friendId){
+        friends.add(friendId);
     }
 }
