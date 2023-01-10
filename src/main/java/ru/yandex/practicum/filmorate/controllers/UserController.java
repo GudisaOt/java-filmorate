@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controllers;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -14,15 +15,10 @@ import java.util.*;
 
 @RestController
 @Slf4j
+@RequiredArgsConstructor
 public class UserController {
     private final InMemoryUserStorage inMemoryUserStorage;
     private final UserService userService;
-
-    @Autowired
-    public UserController(InMemoryUserStorage inMemoryUserStorage, UserService userService) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
-        this.userService = userService;
-    }
 
     @GetMapping("/users")
     public Collection<User> allUsers(){
