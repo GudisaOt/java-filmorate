@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Data
@@ -19,6 +21,7 @@ public class Film {
     @JsonProperty(value = "releaseDate")
     private final LocalDate releaseDate;
     private final int duration;
+    private Set<Integer> likes;
 
     @Builder
     public Film(String name, String description, LocalDate releaseDate, int duration) {
@@ -26,5 +29,6 @@ public class Film {
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+        likes = new HashSet<>();
     }
 }

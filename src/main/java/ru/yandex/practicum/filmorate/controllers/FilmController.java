@@ -1,56 +1,55 @@
 package ru.yandex.practicum.filmorate.controllers;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.services.FilmService;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
-import java.time.LocalDate;
 import java.util.*;
 
 @RestController
 @Slf4j
+@RequiredArgsConstructor
 public class FilmController {
-    private Map<Integer, Film> films =new HashMap();
-
-    private static int iD = 1;
-
+    private final InMemoryFilmStorage inMemoryFilmStorage;
+    private final FilmService filmService;
 
     @GetMapping("/films")
     public Collection<Film> findFilms(){
-        return films.values();
+        return inMemoryFilmStorage.getAll();
+    }
+
+    @GetMapping(value = "/films/{id}")
+    public Film findFilmById (@PathVariable int id){
+        return inMemoryFilmStorage.findFilmById(id);
     }
 
     @PostMapping(value = "/films")
     public Film createFilm (@RequestBody Film film) throws ValidationException {
-            validation(film);
-            film.setId(iD);
-            films.put(iD, film);
-            iD++;
-            log.info("Запрос : POST, Фильм добавлен, Фильмов : '{}'", films.size());
-            return film;
+        return inMemoryFilmStorage.addFilm(film);
     }
 
     @PutMapping(value = "/films")
-    public Film updateFilm(@RequestBody Film film) throws ValidationException {
-        if (films.containsKey(film.getId())){
-            films.put(film.getId(), film);
-            log.info("Запрос : PUT, Фильм обновлен");
-        } else {
-            log.info("Такого фильма не существует! Обновление не удалось!");
-            throw new ValidationException("Ошибка обновления, фильм не найден!");
-        }
-        return film;
+    public Film updateFilm(@RequestBody Film film){
+        return inMemoryFilmStorage.updateFilm(film);
     }
 
-    private static void validation (Film film) throws ValidationException {
-        LocalDate filmsBirthday = LocalDate.parse("1895-12-28");
+    @PutMapping (value = "/films/{id}/like/{userId}")
+    public void likeFilm (@PathVariable int id, @PathVariable int userId){
+        filmService.likeFilm(id, userId);
+    }
 
-        boolean valid = !film.getName().isBlank() && film.getDescription().length() <= 200 &&
-                film.getDuration() > 0 && film.getReleaseDate().isAfter(filmsBirthday);
+    @DeleteMapping (value = "/films/{id}/like/{userId}")
+    public void deleteLike (@PathVariable int id, @PathVariable int userId){
+        filmService.deleteLike(id, userId);
+    }
 
-        if (!valid) {
-            throw new ValidationException("Bad request!!!");
-        }
+    @GetMapping (value = "/films/popular")
+    public List<Film> getMostPopular (@RequestParam (defaultValue = "10") int count){
+        return filmService.mostLikedFilms(count);
     }
 }
