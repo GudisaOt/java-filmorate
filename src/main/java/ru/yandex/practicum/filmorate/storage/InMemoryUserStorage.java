@@ -39,7 +39,7 @@ public class InMemoryUserStorage implements UserStorage {
             user.setName(user.getLogin());
         }
         validation(user);
-       // user.setId(iD);
+        user.setId(iD);
         users.put(iD, user);
         iD++;
         log.info("Запрос : POST,  Пользователь добавлен, Пользователей : '{}'", users.size());

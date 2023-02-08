@@ -32,20 +32,16 @@ public class InMemoryFilmStorage implements FilmStorage {
         return Optional.of(film);
     }
 
+
     @Override
     public Optional<Film> findFilmById(int id) throws NotFoundException {
-        return Optional.empty();
+        if (films.containsKey(id)){
+            log.info("GET запрос, поиск фильма по ID");
+            return Optional.ofNullable(films.get(id));
+        } else {
+            throw new NotFoundException("Фильма с таким ID не существует");
+        }
     }
-
-//    @Override
-//    public Optional<Film> findFilmById(int id) throws NotFoundException {
-//        if (films.containsKey(id)){
-//            log.info("GET запрос, поиск фильма по ID");
-//            return films.get(id);
-//        } else {
-//            throw new NotFoundException("Фильма с таким ID не существует");
-//        }
-//    }
 
     @Override
     public Optional<Film> updateFilm(Film film) throws NotFoundException {
