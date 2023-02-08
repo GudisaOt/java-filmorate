@@ -1,108 +1,202 @@
 package ru.yandex.practicum.filmorate;
 
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.controllers.FilmController;
-import ru.yandex.practicum.filmorate.controllers.UserController;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.dao.FilmDao;
+import ru.yandex.practicum.filmorate.dao.UserDao;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MPARating;
 import ru.yandex.practicum.filmorate.model.User;
 
-
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 @SpringBootTest
-class FilmorateApplicationTests {
-	@Autowired
-	private UserController userController;
-	@Autowired
-	private FilmController filmController;
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
+class FilmoRateApplicationTests {
+	private final UserDao userStorage;
+	private final FilmDao filmDao;
 
+	@SneakyThrows
 	@Test
-	public void emptyFilmNameTestAndLongDescription () {
+	public void testCreateAndFindUserById() {
 
-		Film incorrectName = Film.builder()
-				.name("")
-				.description("film")
-				.duration(200)
-				.releaseDate(LocalDate.now())
+		User user = User.builder()
+				.name("us")
+				.email("us@.mail.com")
+				.login("uss")
+				.birthday(LocalDate.of(2022, 12, 31))
 				.build();
 
-		assertThrows(ValidationException.class, ()->filmController.createFilm(incorrectName));
+		User user1 = userStorage.addUser(user);
 
-		Film incorrectDesc = Film.builder()
-				.name("Blade runner")
-				.description("In 2019 Los Angeles, former police officer Rick Deckard is detained by Officer Gaff, who likes to"+
-						"make origami figures, and is brought to his former supervisor, Bryant." +
-						"Deckard, whose job as a blade runner")
-				.releaseDate(LocalDate.parse("1982-07-25"))
-				.duration(200)
-				.build();
-
-		assertThrows(ValidationException.class, ()->filmController.createFilm(incorrectDesc));
-
+		assertThat(user1)
+				.isNotNull();
 
 	}
 
+	@SneakyThrows
 	@Test
-	public void wrongFilmDateTestAndNegativeDuration () {
-		Film badDateFilm = Film.builder()
-				.name("Krtek")
-				.description("Чешский мультфильм про крота")
-				.releaseDate(LocalDate.parse("1111-05-11"))
-				.duration(400)
+	public void testUpdateUser (){
+		User user = User.builder()
+				.name("us")
+				.email("us@.mail.com")
+				.login("uss")
+				.birthday(LocalDate.of(2022, 12, 31))
+				.build();
+		User userToUpdate = User.builder()
+				.id(1)
+				.name("usNew")
+				.email("NewUs@.mail.com")
+				.login("NewUss")
+				.birthday(LocalDate.of(2022, 12, 31))
 				.build();
 
-		assertThrows(ValidationException.class, ()-> filmController.createFilm(badDateFilm));
+		userStorage.addUser(user);
+		User updated = userStorage.updateUser(userToUpdate);
 
-		Film negDurFilm = Film.builder()
-				.name("There will be blood")
-				.description("Drama film written and directed by Paul Thomas Anderson")
-				.releaseDate(LocalDate.parse("2007-09-27"))
-				.duration(-5)
-				.build();
-
-		assertThrows(ValidationException.class, ()->filmController.createFilm(negDurFilm));
+		assertThat(updated)
+				.hasFieldOrPropertyWithValue("name", "usNew")
+				.hasFieldOrPropertyWithValue("email", "NewUs@.mail.com")
+				.hasFieldOrPropertyWithValue("login", "NewUss");
 	}
 
+	@SneakyThrows
 	@Test
-	public void emptyUserMailAndIncorrectLoginTest (){
-		User emptyMail = User.builder()
-				.email("")
-				.login("Petr")
-				.name("Petya")
-				.birthday(LocalDate.parse("1996-05-06"))
+	public void testGetAllUsers () {
+
+		User user = User.builder()
+				.name("us")
+				.email("us@.mail.com")
+				.login("uss")
+				.birthday(LocalDate.of(2022, 12, 31))
+				.build();
+		User user2= User.builder()
+				.name("usNew")
+				.email("NewUs@.mail.com")
+				.login("NewUss")
+				.birthday(LocalDate.of(2022, 12, 31))
+				.build();
+		User user3= User.builder()
+				.name("3usNew")
+				.email("3NewUs@.mail.com")
+				.login("3NewUss")
+				.birthday(LocalDate.of(2022, 12, 31))
 				.build();
 
-		assertThrows(ValidationException.class, ()-> userController.createUser(emptyMail));
+		userStorage.addUser(user);
+		userStorage.addUser(user2);
+		userStorage.addUser(user3);
+		Collection<User> list = userStorage.getAll();
 
-		User incLog = User.builder()
-				.email("mail@.com")
-				.login("Petr s probelom")
-				.name("Petya")
-				.birthday(LocalDate.parse("1998-04-15"))
-				.build();
-
-		assertThrows(ValidationException.class, ()-> userController.createUser(incLog));
-
-
+		assertThat(list)
+				.isNotEmpty()
+				.contains(user2);
 	}
 
+	@SneakyThrows
 	@Test
-	public void incorrectBirthDate() {
-		User incBirth = User.builder()
-				.email("@mail.com")
-				.login("Darya")
-				.name("Darya")
-				.birthday(LocalDate.parse("2029-10-11"))
+	public void testCreateFilmAndFindByIdAndUpdate (){
+		Film film = Film.builder()
+				.name("film1")
+				.description("about")
+				.releaseDate(LocalDate.of(2015,11,24))
+				.duration(2)
+				.mpa(MPARating.builder()
+						.id(1)
+						.build())
+				.genres(List.of(Genre.builder().id(3).build()))
 				.build();
 
-		assertThrows(ValidationException.class, ()-> userController.createUser(incBirth));
+		Optional<Film> createdFilm = filmDao.addFilm(film);
+
+		assertThat(createdFilm)
+				.isNotNull();
+
+		Film filmToUpd = Film.builder()
+				.id(1)
+				.name("upd")
+				.description("about")
+				.releaseDate(LocalDate.of(2015,11,24))
+				.mpa(MPARating.builder()
+						.id(1)
+						.build())
+				.genres(List.of(Genre.builder().id(3).build()))
+				.duration(4)
+				.build();
+
+		Optional<Film> upd = filmDao.updateFilm(filmToUpd);
+
+		assertThat(upd)
+				.isNotNull()
+				.isPresent()
+				.hasValueSatisfying(film1 -> assertThat(film1)
+						.hasFieldOrPropertyWithValue("name", "upd")
+						.hasFieldOrPropertyWithValue("duration", 4)
+						.hasFieldOrPropertyWithValue("description", "about"));
 	}
 
+	@SneakyThrows
+	@Test
+	public void testGetAllFilmsAndLikeFilmAndGetMostPopular (){
+		//ооздаем множество пользователей и фильмов
+		for (int i = 1; i <= 11; i++) {
+			Film film = Film.builder()
+					.name("film"+ i)
+					.description("about")
+					.releaseDate(LocalDate.of(2015,11,24))
+					.duration(2)
+					.mpa(MPARating.builder()
+							.id(1)
+							.build())
+					.genres(List.of(Genre.builder().id(3).build()))
+					.build();
+			filmDao.addFilm(film);
+
+			User user = User.builder()
+					.name("us"+i)
+					.email("us@.mail.com")
+					.login("uss")
+					.birthday(LocalDate.of(2022, 12, 31))
+					.build();
+			userStorage.addUser(user);
+		}
+
+		Collection<Film> list = filmDao.getAll();
+
+		assertThat(list)
+				.isNotEmpty()
+				.hasSize(11);
+
+		//ставим лайки фильмам
+		for (int i = 1; i <5 ; i++) {
+			filmDao.likeFilm(1, i);
+		}
+		for (int i = 1; i <2 ; i++) {
+			filmDao.likeFilm(4, i);
+		}
+		for (int i = 1; i <3 ; i++) {
+			filmDao.likeFilm(7, i);
+		}
 
 
+		Collection<Film> topLiked = filmDao.mostLikedFilms(3);
+		assertThat(topLiked)
+				.hasSize(3)
+				.contains(filmDao.findFilmById(4).get());
+
+	}
 }
