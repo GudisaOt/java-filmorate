@@ -8,8 +8,6 @@ import ru.yandex.practicum.filmorate.controllers.UserController;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.other.Genre;
-import ru.yandex.practicum.filmorate.other.MPARating;
 
 
 import java.time.LocalDate;
@@ -30,8 +28,6 @@ class FilmorateApplicationTests {
 				.name("")
 				.description("film")
 				.duration(200)
-				.mPA(MPARating.R)
-				.genre(Genre.CARTOON)
 				.releaseDate(LocalDate.now())
 				.build();
 
