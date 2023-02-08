@@ -1,34 +1,38 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 
 @Data
+
 public class Film {
     private int id;
-    private final String name;
-    private final String description;
+    private  String name;
+    private  String description;
+    private   List<Genre> genres;
+    private  MPARating mpa;
     @JsonFormat(pattern = "yyyy-MM-dd")
     @JsonProperty(value = "releaseDate")
-    private final LocalDate releaseDate;
-    private final int duration;
-    private Set<Integer> likes;
-
+    private  LocalDate releaseDate;
     @Builder
-    public Film(String name, String description, LocalDate releaseDate, int duration) {
+    public Film(int id, String name, String description, List<Genre> genres, MPARating mpa, LocalDate releaseDate, int duration) {
+        this.id = id;
         this.name = name;
         this.description = description;
+        this.genres = genres;
+        this.mpa = mpa;
         this.releaseDate = releaseDate;
         this.duration = duration;
-        likes = new HashSet<>();
     }
+    private  int duration;
+    private Set<Integer> likes;
 }

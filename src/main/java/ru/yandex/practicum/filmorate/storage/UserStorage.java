@@ -4,6 +4,7 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface UserStorage {
     Collection<User> getAll();
@@ -15,4 +16,12 @@ public interface UserStorage {
     void deleteUser (User user);
 
     User updateUser (User user) throws ValidationException;
+
+    Collection<User> mutualFriends(int id, int otherId);
+
+    Collection<User> getAllFriends(int id);
+
+    void addFriend(int id, int friendId);
+
+    void deleteFriend(int id, int friendId);
 }

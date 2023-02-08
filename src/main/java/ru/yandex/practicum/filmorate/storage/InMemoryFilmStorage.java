@@ -7,9 +7,7 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -25,27 +23,28 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film addFilm(Film film) throws ValidationException {
+    public Optional<Film> addFilm(Film film) throws ValidationException {
         validation(film);
         film.setId(iD);
         films.put(iD, film);
         iD++;
         log.info("Запрос : POST, Фильм добавлен, Фильмов : '{}'", films.size());
-        return film;
+        return Optional.of(film);
     }
 
+
     @Override
-    public Film findFilmById(int id) throws NotFoundException {
+    public Optional<Film> findFilmById(int id) throws NotFoundException {
         if (films.containsKey(id)){
             log.info("GET запрос, поиск фильма по ID");
-            return films.get(id);
+            return Optional.ofNullable(films.get(id));
         } else {
             throw new NotFoundException("Фильма с таким ID не существует");
         }
     }
 
     @Override
-    public Film updateFilm(Film film) throws NotFoundException {
+    public Optional<Film> updateFilm(Film film) throws NotFoundException {
         if (films.containsKey(film.getId())){
             films.put(film.getId(), film);
             log.info("Запрос : PUT, Фильм обновлен");
@@ -53,7 +52,22 @@ public class InMemoryFilmStorage implements FilmStorage {
             log.info("Такого фильма не существует! Обновление не удалось!");
             throw new NotFoundException("Ошибка обновления, фильм не найден!");
         }
-        return film;
+        return Optional.of(film);
+    }
+
+    @Override
+    public void deleteLike(int id, int userId) {
+
+    }
+
+    @Override
+    public void likeFilm(int id, int userId) {
+
+    }
+
+    @Override
+    public List<Film> mostLikedFilms(int count) {
+        return null;
     }
 
     @Override
